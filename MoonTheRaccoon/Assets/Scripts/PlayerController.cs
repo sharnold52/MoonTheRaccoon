@@ -6,6 +6,8 @@ public class PlayerController : MonoBehaviour
 {
     // Public Variables
     public float speed = 3.0f;
+    public GameObject noiseMakerPrefab;
+    public float noisemakerCooldownTime = 5f;
 
     // Component References
     Rigidbody2D rBody2d;
@@ -15,6 +17,8 @@ public class PlayerController : MonoBehaviour
     // Member Variables
     Vector2 movement;
     Vector2 lookDirection = new Vector2(0, -1);
+    float noiseMakerInput = 0f;
+    bool isThrown = false;
 
     // Start is called before the first frame update
     void Start()
@@ -31,6 +35,7 @@ public class PlayerController : MonoBehaviour
         movement.x = Input.GetAxis("Horizontal");
         movement.y = Input.GetAxis("Vertical");
         movement = Vector2.ClampMagnitude(movement, 1.0f);
+        noiseMakerInput = Input.GetAxis("Firecracker");        
 
         // Animation
         if (!Mathf.Approximately(movement.x, 0.0f) || !Mathf.Approximately(movement.y, 0.0f))
@@ -43,6 +48,13 @@ public class PlayerController : MonoBehaviour
         animator.SetFloat("LookX", lookDirection.x);
         animator.SetFloat("LookY", lookDirection.y);
 
+
+        if (noiseMakerInput > 0 && isThrown == false)
+        {
+            Launch();
+            isThrown = true;
+            Invoke("NoisemakerCooldown", noisemakerCooldownTime);
+        }
     }
 
     // Handle Physics
@@ -61,5 +73,20 @@ public class PlayerController : MonoBehaviour
     public void PlaySound(AudioClip clip)
     {
         audioSource.PlayOneShot(clip);
+    }
+
+    void Launch()
+    {
+        GameObject projectileObject = Instantiate(noiseMakerPrefab, rBody2d.position + Vector2.up * 0.5f, Quaternion.identity);
+
+        Firecracker projectile = projectileObject.GetComponent<Firecracker>();
+        projectile.Launch(lookDirection, 300);
+
+        animator.SetTrigger("Launch");
+    }
+
+    void NoisemakerCooldown()
+    {
+        isThrown = false;
     }
 }
