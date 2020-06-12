@@ -8,6 +8,10 @@ public class LightRotation : MonoBehaviour
 {
     public AIPath pathfinder;
     public SpriteRenderer flashlight;
+    public GameObject searchTarget;
+
+    // member variables
+    bool searching = false;
 
     // Start is called before the first frame update
     void Start()
@@ -18,10 +22,10 @@ public class LightRotation : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if(pathfinder != null && flashlight != null)
+        if(pathfinder != null && flashlight != null && !searching)
         {
             // calculate rotation
-            Vector2 direction = new Vector2(pathfinder.desiredVelocity.x, pathfinder.desiredVelocity.y);
+            Vector2 direction = new Vector2(searchTarget.transform.localPosition.x, searchTarget.transform.localPosition.y);
             direction = direction.normalized;
             if(pathfinder.desiredVelocity != Vector3.zero)
             {
@@ -31,11 +35,11 @@ public class LightRotation : MonoBehaviour
                 // change flashlight order in layer
                 if (newRotation.z > -90 && newRotation.z < 90)
                 {
-                    flashlight.sortingOrder = 0;
+                    //flashlight.sortingOrder = 0;
                 }
                 else
                 {
-                    flashlight.sortingOrder = 2;
+                    //flashlight.sortingOrder = 2;
                 }
             }
         }

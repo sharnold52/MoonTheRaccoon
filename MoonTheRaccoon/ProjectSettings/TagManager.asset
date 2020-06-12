@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Enemy
+  - Interactable
   layers:
   - Default
   - TransparentFX
@@ -20,7 +21,7 @@ TagManager:
   - Enemies
   - Firecracker
   - Camera
-  - 
+  - Interactables
   - 
   - 
   - 

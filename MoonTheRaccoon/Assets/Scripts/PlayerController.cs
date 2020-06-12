@@ -19,7 +19,9 @@ public class PlayerController : MonoBehaviour
     Vector2 movement;
     Vector2 lookDirection = new Vector2(0, -1);
     float noiseMakerInput = 0f;
+    float interactInput = 0f;
     bool isThrown = false;
+    bool isHidden = false;
 
     // Start is called before the first frame update
     void Start()
@@ -32,29 +34,44 @@ public class PlayerController : MonoBehaviour
     // Handle Input
     void Update()
     {
-        // Store Input
-        movement.x = Input.GetAxis("Horizontal");
-        movement.y = Input.GetAxis("Vertical");
-        movement = Vector2.ClampMagnitude(movement, 1.0f);
-        noiseMakerInput = Input.GetAxis("Firecracker");        
-
-        // Animation
-        if (!Mathf.Approximately(movement.x, 0.0f) || !Mathf.Approximately(movement.y, 0.0f))
+        // check if player is hidden
+        if (!isHidden)
         {
-            lookDirection.Set(movement.x, movement.y);
-            lookDirection.Normalize();
+            // Store Input
+            movement.x = Input.GetAxis("Horizontal");
+            movement.y = Input.GetAxis("Vertical");
+            movement = Vector2.ClampMagnitude(movement, 1.0f);
+            noiseMakerInput = Input.GetAxis("Firecracker");
+
+            // Animation
+            if (!Mathf.Approximately(movement.x, 0.0f) || !Mathf.Approximately(movement.y, 0.0f))
+            {
+                lookDirection.Set(movement.x, movement.y);
+                lookDirection.Normalize();
+            }
+
+            animator.SetFloat("Speed", movement.magnitude);
+            animator.SetFloat("LookX", lookDirection.x);
+            animator.SetFloat("LookY", lookDirection.y);
+
+
+            if (noiseMakerInput > 0 && isThrown == false)
+            {
+                Launch();
+                isThrown = true;
+                Invoke("NoisemakerCooldown", noisemakerCooldownTime);
+            }
         }
-
-        animator.SetFloat("Speed", movement.magnitude);
-        animator.SetFloat("LookX", lookDirection.x);
-        animator.SetFloat("LookY", lookDirection.y);
-
-
-        if (noiseMakerInput > 0 && isThrown == false)
+        else
         {
-            Launch();
-            isThrown = true;
-            Invoke("NoisemakerCooldown", noisemakerCooldownTime);
+            // Get interactInput
+            interactInput = Input.GetAxis("Interact");
+
+            if(interactInput > 0)
+            {
+                // exit hiding spot
+
+            }
         }
     }
 
@@ -78,16 +95,59 @@ public class PlayerController : MonoBehaviour
 
     void Launch()
     {
-        GameObject projectileObject = Instantiate(noiseMakerPrefab, rBody2d.position + Vector2.up * 0.5f, Quaternion.identity);
+        // check if firecracker would collide with obstacles at instantiation point
+        LayerMask walls = LayerMask.GetMask("Obstacles");
+        Vector3 spawnLocation = rBody2d.position + Vector2.up * 0.5f;
+        if(Physics2D.OverlapCircle(spawnLocation, 0.3f, walls) != null)
+        {
+            spawnLocation = rBody2d.position;
+        }
 
+        // instantiate projectile and launch it
+        GameObject projectileObject = Instantiate(noiseMakerPrefab, spawnLocation, Quaternion.identity);
         Firecracker projectile = projectileObject.GetComponent<Firecracker>();
         projectile.Launch(lookDirection, 300);
 
+        // Trigger player animation
         animator.SetTrigger("Launch");
     }
 
     void NoisemakerCooldown()
     {
         isThrown = false;
+    }
+
+    // Hide and reveal player
+    public void HidePlayer()
+    {
+        // hide sprite
+        isHidden = true;
+        gameObject.GetComponent<SpriteRenderer>().enabled = false;
+        gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezePositionY | RigidbodyConstraints2D.FreezeRotation;
+
+        // zero out movement
+        movement = Vector2.zero;
+    }
+
+    public void RevealPlayer()
+    {
+        // hide sprite
+        isHidden = false;
+        gameObject.GetComponent<SpriteRenderer>().enabled = true;
+        gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeRotation;
+    }
+
+    // check if player got caught
+    public void CheckPlayerCaught()
+    {
+        if (isHidden)
+        {
+            // player was not caught
+        }
+        else
+        {
+            // player was caught
+            Debug.Log("Player was caught!");
+        }
     }
 }
