@@ -97,7 +97,7 @@ public class EnemyPath : MonoBehaviour
     // check if player entered the collider
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.tag.Equals("Player"))
+        if (collision.tag.Equals("Player") && !collision.GetComponent<PlayerController>().Hidden())
         {
             // Get Initial Direction
             if (Math.Abs(lookDirection.x ) > Math.Abs(lookDirection.y))         // x direction

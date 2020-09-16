@@ -14,7 +14,6 @@ public class PlayerController : MonoBehaviour
     Rigidbody2D rBody2d;
     AudioSource audioSource;
     Animator animator;
-    Collider2D playerCol;
 
     // Member Variables
     Vector2 movement;
@@ -30,7 +29,6 @@ public class PlayerController : MonoBehaviour
         rBody2d = GetComponent<Rigidbody2D>();
         audioSource = GetComponent<AudioSource>();
         animator = GetComponent<Animator>();
-        playerCol = GetComponent<Collider2D>();
     }
 
     // Handle Input
@@ -124,7 +122,6 @@ public class PlayerController : MonoBehaviour
     {
         // hide sprite
         isHidden = true;
-        playerCol.enabled = false;
         gameObject.GetComponent<SpriteRenderer>().enabled = false;
         gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezePositionY | RigidbodyConstraints2D.FreezeRotation;
 
@@ -136,7 +133,6 @@ public class PlayerController : MonoBehaviour
     {
         // hide sprite
         isHidden = false;
-        playerCol.enabled = true;
         gameObject.GetComponent<SpriteRenderer>().enabled = true;
         gameObject.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeRotation;
     }
@@ -153,5 +149,10 @@ public class PlayerController : MonoBehaviour
             // player was caught
             Debug.Log("Player was caught!");
         }
+    }
+
+    public bool Hidden()
+    {
+        return isHidden;
     }
 }
