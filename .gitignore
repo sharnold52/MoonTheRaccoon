@@ -11,6 +11,7 @@
 # Whitelisted directories/files
 !/ProjectSettings/
 !/Assets/                # Add Assets folder
+!/Packages/     
 !/Build/
 !/TemplateData/
 !/index.html
