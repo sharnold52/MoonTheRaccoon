@@ -35,11 +35,11 @@ public class LightRotation : MonoBehaviour
                 // change flashlight order in layer
                 if (newRotation.z > -90 && newRotation.z < 90)
                 {
-                    //flashlight.sortingOrder = 0;
+                    flashlight.sortingOrder = 0;
                 }
                 else
                 {
-                    //flashlight.sortingOrder = 2;
+                    flashlight.sortingOrder = 2;
                 }
             }
         }

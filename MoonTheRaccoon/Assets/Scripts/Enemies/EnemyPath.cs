@@ -36,10 +36,11 @@ public class EnemyPath : MonoBehaviour
     float timeOnAlert = 0f;
     float initialMaxSpeed = 0f;
     float lerpFraction = 0f;
+    Vector3 currentDirVector;
     int currentDirection;
     int backDirection;
-    int searchDirection1;
-    int searchDirection2;
+    int leftDirection;
+    int rightDirection;
 
 
     // Start is called before the first frame update
@@ -111,36 +112,44 @@ public class EnemyPath : MonoBehaviour
             initialDirection = initialDirection.normalized;
 
             // set search direction to behind enemy
+            float dirWeight = 0f; // weight of direction
+
             if (initialDirection.x > 0)
             {
-                backDirection = 3;       // left
-                searchDirection1 = 2;
-                searchDirection2 = 0;
-                currentDirection = 2;
+                dirWeight = initialDirection.x;
+                backDirection = 3;      // left
+                leftDirection = 2;
+                rightDirection = 0;
+                currentDirection = 3;
             }
             else if(initialDirection.x < 0)
             {
+                dirWeight = -initialDirection.x;
                 backDirection = 1;       // right
-                searchDirection1 = 0;
-                searchDirection2 = 2;
-                currentDirection = 0;
-            }
-            else if (initialDirection.y > 0)
-            {
-                backDirection = 0;       // up
-                searchDirection1 = 3;
-                searchDirection2 = 1;
-                currentDirection = 3;
-            }
-            else if (initialDirection.y < 0)
-            {
-                backDirection = 2;       // down
-                searchDirection1 = 1;
-                searchDirection2 = 3;
+                leftDirection = 0;
+                rightDirection = 2;
                 currentDirection = 1;
             }
+            
+            if (initialDirection.y < 0 && -initialDirection.y > dirWeight)
+            {
+                dirWeight = -initialDirection.y;
+                backDirection = 0;       // up
+                leftDirection = 1;
+                rightDirection = 3;
+                currentDirection = 0;
+            }
+            else if (initialDirection.y > 0 && initialDirection.y > dirWeight)
+            {
+                dirWeight = initialDirection.y;
+                backDirection = 2;       // down
+                leftDirection = 3;
+                rightDirection = 1;
+                currentDirection = 2;
+            }
 
-            searchTarget.transform.localPosition = lookDirection;
+            currentDirVector = searchDirections[leftDirection];
+
             isAware = true;
             aiPath.maxSpeed = 0.01f;
         }
@@ -152,7 +161,8 @@ public class EnemyPath : MonoBehaviour
         timeOnAlert += Time.deltaTime;
 
         // lerp to current search target and update destination transform
-        searchTarget.transform.localPosition = Vector3.Lerp(initialDirection * 0.5f, searchDirections[currentDirection] * 0.5f, lerpFraction);
+        searchTarget.transform.localPosition = Vector3.Lerp(initialDirection.normalized, currentDirVector.normalized, lerpFraction).normalized;
+
         destination.target = searchTarget.transform;
 
         // increment lerp
@@ -165,8 +175,9 @@ public class EnemyPath : MonoBehaviour
             lerpFraction = 0;
 
             // set initial direction to current direction and set current direction to back
-            initialDirection = searchDirections[currentDirection];
+            initialDirection = currentDirVector;
             currentDirection = backDirection;
+            currentDirVector = searchDirections[currentDirection];
 
             // checked the back of the enemy
             checkedBack = true;
@@ -175,42 +186,19 @@ public class EnemyPath : MonoBehaviour
         {
             // reset lerp
             lerpFraction = 0;
+            initialDirection = currentDirVector;
 
-            // set initial direction to current direction
-            initialDirection = searchDirections[currentDirection];
-
-            // set new current direction
+            // look left
             if (searchLeft)
             {
-                if(currentDirection == backDirection)
-                {
-                    currentDirection = searchDirection1;
-                }
-                else if(currentDirection == searchDirection1)
-                {
-                    currentDirection = backDirection;
-                    searchLeft = false;
-                }
-                else
-                {
-                    currentDirection = backDirection;
-                }
+                currentDirVector = (searchDirections[backDirection] + searchDirections[leftDirection]).normalized;
+                searchLeft = false;
             }
+            // look right
             else
             {
-                if (currentDirection == backDirection)
-                {
-                    currentDirection = searchDirection2;
-                }
-                else if (currentDirection == searchDirection2)
-                {
-                    currentDirection = backDirection;
-                    searchLeft = true;
-                }
-                else
-                {
-                    currentDirection = backDirection;
-                }
+                currentDirVector = (searchDirections[backDirection] + searchDirections[rightDirection]).normalized;
+                searchLeft = true;
             }
         }
 
